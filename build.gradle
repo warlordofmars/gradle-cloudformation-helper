@@ -1,0 +1,15 @@
+buildscript {
+    dependencies {
+        classpath 'com.github.warlordofmars:gradle-release-helper:release-0.1.3'
+    }
+}
+
+apply plugin: 'com.github.warlordofmars.gradle.release'
+apply plugin: 'groovy'
+apply plugin: 'maven'
+
+dependencies {
+    compile gradleApi()
+}
+
+githubRelease.releaseAssets jar.archivePath
