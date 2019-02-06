@@ -10,6 +10,7 @@ apply plugin: 'maven'
 
 dependencies {
     compile gradleApi()
+    compile 'com.github.warlordofmars:gradle-prerequisites-check:release-0.1.0'
 }
 
 githubRelease.releaseAssets jar.archivePath

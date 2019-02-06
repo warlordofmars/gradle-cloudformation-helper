@@ -13,6 +13,7 @@ class CloudFormationHelperPlugin implements Plugin<Project> {
         
 
         project.plugins.apply('jp.classmethod.aws.cloudformation')
+        project.plugins.apply('com.github.warlordofmars.gradle.prerequisites')
 
 
         project.ext.tests = [
@@ -22,11 +23,16 @@ class CloudFormationHelperPlugin implements Plugin<Project> {
             cfnNagTest: [project.cloudformationSource, 'Resume Website CloudFormation Best Practices'],
         ]
 
+        project.ext.prerequisites << [
+            'aws': 'Install via \'brew install awscli\'',
+            'cfn-lint': 'Install via \'pip install cfn-lint\'',
+            'cfn_nag_scan': 'Install via \'gem install cfn-nag\'',
+        ]
 
 
         project.task('deploy') {
             description 'Deploy CloudFormation Template for Resume Website'
-            dependsOn project.awsCfnMigrateStackAndWaitCompleted, project.rootProject.registerTests
+            dependsOn project.awsCfnMigrateStackAndWaitCompleted, project.rootProject.registerTests, project.checkPrerequisites
             
             doLast {
 
@@ -71,7 +77,7 @@ class CloudFormationHelperPlugin implements Plugin<Project> {
         project.awsCfnMigrateStack.dependsOn project.awsCfnUploadTemplate
 
         project.task('cfnLint') {
-            dependsOn project.rootProject.checkPrerequisites, project.rootProject.registerTests
+            dependsOn project.checkPrerequisites, project.rootProject.registerTests
             
             doFirst {
                 def out = new ByteArrayOutputStream()
@@ -89,7 +95,7 @@ class CloudFormationHelperPlugin implements Plugin<Project> {
         }
 
         project.task('cfnNag') {
-            dependsOn project.rootProject.checkPrerequisites, project.rootProject.registerTests
+            dependsOn project.checkPrerequisites, project.rootProject.registerTests
             
             doFirst {
                 def out = new ByteArrayOutputStream()
