@@ -15,7 +15,7 @@ class CloudFormationHelperPlugin implements Plugin<Project> {
         project.plugins.apply('jp.classmethod.aws.cloudformation')
         project.plugins.apply('com.github.warlordofmars.gradle.prerequisites')
 
-
+        
         project.ext.tests = [
             cfnTemplateDeployedTest: [project.cloudformationSource, 'Resume Website CloudFormation Stack Created / Updated Successfully '],
             cfnTemplateDeployedProdTest: [project.cloudformationSource, 'Resume Website CloudFormation Stack Created / Updated Successfully in Production'],
