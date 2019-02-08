@@ -9,8 +9,11 @@ import java.io.ByteArrayOutputStream
 
 class CloudFormationHelperPlugin implements Plugin<Project> {
 
+    CloudFormationExtension mExtension
+
     void apply(Project project) {
         
+        mExtension = project.extensions.create('cloudformation', CloudFormationExtension)
 
         project.plugins.apply('jp.classmethod.aws.cloudformation')
         project.plugins.apply('com.github.warlordofmars.gradle.prerequisites')
@@ -19,10 +22,10 @@ class CloudFormationHelperPlugin implements Plugin<Project> {
 
         
         project.ext.tests = [
-            cfnTemplateDeployedTest: [project.cloudformationSource, 'Resume Website CloudFormation Stack Created / Updated Successfully '],
-            cfnTemplateDeployedProdTest: [project.cloudformationSource, 'Resume Website CloudFormation Stack Created / Updated Successfully in Production'],
-            cfnLintTest: [project.cloudformationSource, 'Resume Website CloudFormation Linting / Syntax Check'],
-            cfnNagTest: [project.cloudformationSource, 'Resume Website CloudFormation Best Practices'],
+            cfnTemplateDeployedTest: [project.cloudFormation.templateFile, 'CloudFormation Stack Created / Updated Successfully '],
+            cfnTemplateDeployedProdTest: [project.cloudFormation.templateFile, 'CloudFormation Stack Created / Updated Successfully in Production'],
+            cfnLintTest: [project.cloudFormation.templateFile, 'CloudFormation Linting / Syntax Check'],
+            cfnNagTest: [project.cloudFormation.templateFile, 'CloudFormation Best Practices'],
         ]
 
         project.ext.prerequisites << [
@@ -30,47 +33,59 @@ class CloudFormationHelperPlugin implements Plugin<Project> {
             'cfn-lint': 'Install via \'pip install cfn-lint\'',
             'cfn_nag_scan': 'Install via \'gem install cfn-nag\'',
         ]
-
-
-        project.task('deploy') {
-            description 'Deploy CloudFormation Template for Resume Website'
-            dependsOn project.awsCfnMigrateStackAndWaitCompleted, project.rootProject.registerTests, project.checkPrerequisites
-            
-            doLast {
-
-                def out = new ByteArrayOutputStream()
-                project.exec {
-                    commandLine 'aws', 'cloudformation', 'describe-stacks', '--stack-name', project.cloudFormation.stackName
-                    standardOutput out
-                }
-                
-                def stackDetails = new JsonSlurper().parseText(out.toString())['Stacks'][0]
-                
-
-                def message = "cloudformation stack \"${stackDetails['StackName']}\" has status: \"${stackDetails['StackStatus']}\"\n\nstack created: \"${stackDetails['CreationTime']}\"\nstack last updated: \"${stackDetails['LastUpdatedTime']}\"\n\n"
-                stackDetails['Outputs'].each { output ->
-                    message = message + "${output['OutputKey']}: \"${output['OutputValue']}\"\n"
-                }
-
-                def cfnTemplateDeployedTestObj = project.rootProject.cfnTemplateDeployedTest
-
-                if(System.env.containsKey('PROMOTE')) {
-                    cfnTemplateDeployedTestObj = project.rootProject.cfnTemplateDeployedProdTest
-                }
-
-                if(stackDetails['StackStatus'] in ["CREATE_COMPLETE", "UPDATE_COMPLETE"]) {
-                    cfnTemplateDeployedTestObj.success(message)
-                } else {
-                    cfnTemplateDeployedTestObj.failure('CloudFormation Failed to Deploy', message)
-                }
-                
+        
+        project.afterEvaluate {
+            project.cloudFormation {
+                stackName mExtension.stackName
+                templateFile mExtension.templateFile
+                templateBucket mExtension.templateBucket
+                templateKeyPrefix mExtension.stackName
+                stackParams (mExtension.stackParams)
             }
         }
+        
+        project.afterEvaluate {
+            project.task('deploy') {
+                description 'Deploy CloudFormation Stack from Template'
+                dependsOn project.awsCfnMigrateStackAndWaitCompleted, project.rootProject.registerTests, project.checkPrerequisites
+                
+                doLast {
 
-        project.awsCfnUploadTemplate.finalizedBy project.deploy
-        project.awsCfnMigrateStack.finalizedBy project.deploy
-        project.awsCfnWaitStackComplete.finalizedBy project.deploy
-        project.awsCfnMigrateStackAndWaitCompleted.finalizedBy project.deploy
+                    def out = new ByteArrayOutputStream()
+                    project.exec {
+                        commandLine 'aws', 'cloudformation', 'describe-stacks', '--stack-name', project.cloudFormation.stackName
+                        standardOutput out
+                    }
+                    
+                    def stackDetails = new JsonSlurper().parseText(out.toString())['Stacks'][0]
+                    
+
+                    def message = "cloudformation stack \"${stackDetails['StackName']}\" has status: \"${stackDetails['StackStatus']}\"\n\nstack created: \"${stackDetails['CreationTime']}\"\nstack last updated: \"${stackDetails['LastUpdatedTime']}\"\n\n"
+                    stackDetails['Outputs'].each { output ->
+                        message = message + "${output['OutputKey']}: \"${output['OutputValue']}\"\n"
+                    }
+
+                    def cfnTemplateDeployedTestObj = project.rootProject.cfnTemplateDeployedTest
+
+                    if(mExtension.isPromote) {
+                        cfnTemplateDeployedTestObj = project.rootProject.cfnTemplateDeployedProdTest
+                    }
+
+                    if(stackDetails['StackStatus'] in ["CREATE_COMPLETE", "UPDATE_COMPLETE"]) {
+                        cfnTemplateDeployedTestObj.success(message)
+                    } else {
+                        cfnTemplateDeployedTestObj.failure('CloudFormation Failed to Deploy', message)
+                    }
+                    
+                }
+            }
+
+            project.awsCfnUploadTemplate.finalizedBy project.deploy
+            project.awsCfnMigrateStack.finalizedBy project.deploy
+            project.awsCfnWaitStackComplete.finalizedBy project.deploy
+            project.awsCfnMigrateStackAndWaitCompleted.finalizedBy project.deploy
+
+        }
 
         project.task('delete') {
             dependsOn project.awsCfnDeleteStackAndWaitCompleted
@@ -84,7 +99,7 @@ class CloudFormationHelperPlugin implements Plugin<Project> {
             doFirst {
                 def out = new ByteArrayOutputStream()
                 def result = project.exec {
-                    commandLine 'cfn-lint', project.cloudformationSource
+                    commandLine 'cfn-lint', project.cloudFormation.templateFile
                     standardOutput out
                     ignoreExitValue true
                 }
@@ -102,7 +117,7 @@ class CloudFormationHelperPlugin implements Plugin<Project> {
             doFirst {
                 def out = new ByteArrayOutputStream()
                 def result = project.exec {
-                    commandLine 'cfn_nag_scan', '--input-path', project.cloudformationSource
+                    commandLine 'cfn_nag_scan', '--input-path', project.cloudFormation.templateFile
                     standardOutput out
                     ignoreExitValue true
                 }
