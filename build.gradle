@@ -10,7 +10,7 @@ apply plugin: 'maven'
 
 dependencies {
     compile gradleApi()
-    compile 'com.github.warlordofmars:gradle-prerequisites-check:release-0.1.0'
+    compile 'com.github.warlordofmars:gradle-prerequisites-check:release-0.1.2'
     compile 'com.github.warlordofmars:gradle-customtest-helper:release-0.1.9'
     compile 'jp.classmethod.aws:gradle-aws-plugin:0.30'
     compile 'javax.xml.bind:jaxb-api:2.3.0'
