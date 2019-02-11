@@ -44,9 +44,12 @@ class CloudFormationHelperPlugin implements Plugin<Project> {
             }
         }
         
+        def TASK_GROUP = 'CloudFormation'
+
         project.afterEvaluate {
             project.task('deploy') {
                 description 'Deploy CloudFormation Stack from Template'
+                group TASK_GROUP
                 dependsOn project.awsCfnMigrateStackAndWaitCompleted, project.rootProject.registerTests, project.checkPrerequisites
                 
                 doLast {
@@ -88,12 +91,16 @@ class CloudFormationHelperPlugin implements Plugin<Project> {
         }
 
         project.task('delete') {
+            description 'Delete CloudFormation Stack'
+            group TASK_GROUP
             dependsOn project.awsCfnDeleteStackAndWaitCompleted
         }
 
         project.awsCfnMigrateStack.dependsOn project.awsCfnUploadTemplate
 
         project.task('cfnLint') {
+            description 'Run cfn-lint syntax check against CloudFormation template'
+            group TASK_GROUP
             dependsOn project.checkPrerequisites, project.rootProject.registerTests
             
             doFirst {
@@ -112,6 +119,8 @@ class CloudFormationHelperPlugin implements Plugin<Project> {
         }
 
         project.task('cfnNag') {
+            description 'Run cfn_nag_scan best practices check against CloudFormation template'
+            group TASK_GROUP
             dependsOn project.checkPrerequisites, project.rootProject.registerTests
             
             doFirst {
@@ -131,6 +140,8 @@ class CloudFormationHelperPlugin implements Plugin<Project> {
         }
 
         project.task('build') {
+            description 'Meta task to perform all required tasks as part of a CloudFormation "build"'
+            group TASK_GROUP
             dependsOn project.cfnLint, project.cfnNag
         }
 
