@@ -8,10 +8,10 @@ Gradle plugin to provide full automation for a CloudFormation project.  This inc
 
 ## Features
 
-* **Syntax Validation** - 
-* **Best Practices Check** - 
-* **Stack Deployment** -
-* **Test Results** -
+* **Syntax Validation** - CloudFormation template syntax is checked against CloudFormation specifications.  All resources defined are check to make sure the match what CloudFormation is expecting.
+* **Best Practices Check** - CloudFormation template is analyzed for any deviation from CloudFormation best practices
+* **Stack Deployment** -CloudFormation stack deployed from CloudFormation template
+* **Test Results** - All tests that are performed throughout the `build` and `deploy` process are captured and recorded in a JUnit-style XML report.
 
 
 ## Prerequisites
@@ -20,6 +20,8 @@ There are two prerequisites required to exist prior to using this plugin:
 
 ### cfn-lint
 
+[cfn-lint](https://github.com/awslabs/cfn-python-lint) is used for basic linting and sytax validation of CloudFormation templates.
+
 To install `cfn-lint` utility, run the following:
 
 ```bash
@@ -27,6 +29,8 @@ pip install cfn-lint
 ```
 
 ### cfn_nag
+
+[cfn_nag](https://github.com/stelligent/cfn_nag) is used for CloudFormation template static analysis to ensure templates are adhering to best practices.
 
 To install `cfn_nag` utility, run the following:
 
