@@ -13,7 +13,6 @@ Gradle plugin to provide full automation for a CloudFormation project.  This inc
 * **Stack Deployment** -CloudFormation stack deployed from CloudFormation template
 * **Test Results** - All tests that are performed throughout the `build` and `deploy` process are captured and recorded in a JUnit-style XML report.
 
-
 ## Prerequisites
 
 There are two prerequisites required to exist prior to using this plugin:
@@ -69,16 +68,16 @@ cloudformation {
 
     // the cloudformation template file
     templateFile = file(rootProject.cloudformationSource)
-    
+
     // an existing S3 bucket that can be used to host the cloudformation template
     templateBucket = rootProject.cloudformationBucket
-    
+
     // a mapping of stack parameters and their values to be used
     stackParams = [
         ParamName: '<Some_Param_Value>',
         AnotherParamName: '<Some_Other_Param_Value>'
     ]
-    
+
     // is this build part of promote step?
     isPromote = System.env.containsKey('PROMOTE)
 
