@@ -37,6 +37,16 @@ To install `cfn_nag` utility, run the following:
 gem install cfn-nag
 ```
 
+### awscli
+
+[awscli](https://aws.amazon.com/cli/) is used to perform some post deploy checks after CloudFormation stack has been updated / created.
+
+To install `awscli` utility, run the following:
+
+```bash
+brew install awscli
+```
+
 ## Setup
 
 To use this plugin, the following buildscript repositories and dependencies must be configured:
