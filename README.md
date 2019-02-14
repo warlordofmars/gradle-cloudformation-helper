@@ -111,3 +111,8 @@ This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md
 * Using the [gradle-aws-plugin](https://github.com/classmethod/gradle-aws-plugin) for AWS API interactions (create / update / delete CloudFormation stacks)
 * Using [cfn_nag](https://github.com/stelligent/cfn_nag) for CloudFormation template static analysis to ensure templates are adhering to best practices
 * Using [cfn-lint](https://github.com/awslabs/cfn-python-lint) for basic linting and sytax validation of CloudFormation templates
+* Using the [warlordofmars](https://github.com/warlordofmars) gradle plugin, [gradle-release-helper](https://github.com/warlordofmars/gradle-release-helper), for automatic versioning, git tagging, and publishing of releases to GitHub
+* Using the [warlordofmars](https://github.com/warlordofmars) gradle plugin, [gradle-customtest-helper](https://github.com/warlordofmars/gradle-customtest-helper), for recording custom test results to junit-style XML report
+* Using the [warlordofmars](https://github.com/warlordofmars) gradle plugin, [gradle-prerequisites-check](https://github.com/warlordofmars/gradle-prerequisites-check), for validating all required custom prerequisite binaries are already installed on build system
+* Using the [warlordofmars](https://github.com/warlordofmars) custom gradle distribution [warlordofmars-gradle](https://github.com/warlordofmars/warlordofmars-gradle) in order to define default repositories to avoid duplication across all projects
+* Using the [warlordofmars](https://github.com/warlordofmars) jenkins pipeline library [jenkins-library](https://github.com/warlordofmars/jenkins-library) for re-usable CI/CD pipeline components
